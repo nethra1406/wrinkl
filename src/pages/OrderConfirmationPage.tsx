@@ -13,34 +13,29 @@ const OrderConfirmationPage: React.FC = () => {
     clearCart();
   }, [clearCart]);
   useEffect(() => {
-  const sendWhatsApp = async () => {
-    try {
-      if (!currentOrder) return;
+    const sendHelloWhatsApp = async () => {
+      try {
+        if (!currentOrder) return;
 
-      const payload = {
-        orderId: currentOrder.id,
-        customerName: currentOrder.customer.name,
-        package: "Standard Wash", // or pull from currentOrder.items if available
-        deliveryDate: new Date(Date.now() + 2 * 24 * 60 * 60 * 1000).toLocaleDateString(), // +2 days
-        phoneNumber: currentOrder.customer.phone.startsWith("+91")
+        const phoneNumber = currentOrder.customer.phone.startsWith("+91")
           ? currentOrder.customer.phone
-          : `+91${currentOrder.customer.phone}`
-      };
+          : `+91${currentOrder.customer.phone}`;
 
-      await fetch("https://whatsapp-bot-laundry.onrender.com/send-whatsapp", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(payload)
-      });
+        await fetch("https://whatsapp-bot-laundry.onrender.com/send-whatsapp", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ phoneNumber })
+        });
 
-      console.log("✅ WhatsApp confirmation sent!");
-    } catch (error) {
-      console.error("❌ WhatsApp send error:", error);
-    }
-  };
+        console.log("✅ Hello WhatsApp message sent!");
+      } catch (error) {
+        console.error("❌ WhatsApp send error:", error);
+      }
+    };
 
-  sendWhatsApp();
-}, [currentOrder]);
+    sendHelloWhatsApp();
+  }, [currentOrder]);
+
 
   
   if (!currentOrder) {
