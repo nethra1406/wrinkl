@@ -12,6 +12,36 @@ const OrderConfirmationPage: React.FC = () => {
     // Clear the cart after confirmation
     clearCart();
   }, [clearCart]);
+  useEffect(() => {
+  const sendWhatsApp = async () => {
+    try {
+      if (!currentOrder) return;
+
+      const payload = {
+        orderId: currentOrder.id,
+        customerName: currentOrder.customer.name,
+        package: "Standard Wash", // or pull from currentOrder.items if available
+        deliveryDate: new Date(Date.now() + 2 * 24 * 60 * 60 * 1000).toLocaleDateString(), // +2 days
+        phoneNumber: currentOrder.customer.phone.startsWith("+91")
+          ? currentOrder.customer.phone
+          : `+91${currentOrder.customer.phone}`
+      };
+
+      await fetch("https://whatsapp-bot-laundry.onrender.com/send-whatsapp", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(payload)
+      });
+
+      console.log("✅ WhatsApp confirmation sent!");
+    } catch (error) {
+      console.error("❌ WhatsApp send error:", error);
+    }
+  };
+
+  sendWhatsApp();
+}, [currentOrder]);
+
   
   if (!currentOrder) {
     return (
