@@ -5,39 +5,40 @@ import { CheckCircle } from 'lucide-react';
 
 const OrderConfirmationPage: React.FC = () => {
   const { currentOrder, clearCart } = useOrderStore();
-  
+
   useEffect(() => {
     document.title = 'Order Confirmation - Pristine Laundry';
-    
-    // Clear the cart after confirmation
-    clearCart();
+    clearCart(); // Clear cart once page loads
   }, [clearCart]);
+
   useEffect(() => {
     const sendHelloWhatsApp = async () => {
+      if (!currentOrder?.customer?.phone) return;
+
+      const phone = currentOrder.customer.phone;
+      const formattedPhone = phone.startsWith('+91') ? phone : `+91${phone}`;
+
       try {
-        if (!currentOrder) return;
-
-        const phoneNumber = currentOrder.customer.phone.startsWith("+91")
-          ? currentOrder.customer.phone
-          : `+91${currentOrder.customer.phone}`;
-
-        await fetch("https://whatsapp-bot-laundry.onrender.com/send-whatsapp", {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({ phoneNumber })
+        const res = await fetch('https://whatsapp-bot-laundry.onrender.com/send-whatsapp', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ phoneNumber: formattedPhone }),
         });
 
-        console.log("✅ Hello WhatsApp message sent!");
-      } catch (error) {
-        console.error("❌ WhatsApp send error:", error);
+        if (!res.ok) {
+          const err = await res.json();
+          console.error('❌ WhatsApp send failed:', err);
+        } else {
+          console.log('✅ WhatsApp Hello message sent!');
+        }
+      } catch (err) {
+        console.error('❌ WhatsApp request error:', err);
       }
     };
 
     sendHelloWhatsApp();
   }, [currentOrder]);
 
-
-  
   if (!currentOrder) {
     return (
       <div className="container px-4 py-16 mx-auto text-center">
@@ -54,7 +55,7 @@ const OrderConfirmationPage: React.FC = () => {
       </div>
     );
   }
-  
+
   return (
     <div className="container px-4 py-16 mx-auto max-w-2xl">
       <div className="bg-white p-8 rounded-lg shadow-md border border-gray-100">
@@ -67,30 +68,30 @@ const OrderConfirmationPage: React.FC = () => {
             Thank you for choosing Pristine Laundry. We'll contact you soon.
           </p>
         </div>
-        
+
         <div className="border-t border-gray-100 pt-6">
           <h2 className="text-lg font-semibold text-gray-900 mb-4">Order Details</h2>
-          
+
           <div className="mb-4">
             <p className="text-sm text-gray-500">Order ID</p>
             <p className="font-medium text-gray-900">{currentOrder.id}</p>
           </div>
-          
+
           <div className="mb-4">
             <p className="text-sm text-gray-500">Customer</p>
             <p className="font-medium text-gray-900">{currentOrder.customer.name}</p>
           </div>
-          
+
           <div className="mb-4">
             <p className="text-sm text-gray-500">Phone</p>
             <p className="font-medium text-gray-900">{currentOrder.customer.phone}</p>
           </div>
-          
+
           <div className="mb-6">
             <p className="text-sm text-gray-500">Address</p>
             <p className="font-medium text-gray-900">{currentOrder.customer.address}</p>
           </div>
-          
+
           <div className="border-t border-gray-100 pt-6 mb-6">
             <h3 className="text-md font-semibold text-gray-900 mb-4">What Happens Next?</h3>
             <ol className="space-y-2 text-gray-600">
@@ -104,12 +105,12 @@ const OrderConfirmationPage: React.FC = () => {
               </li>
               <li className="flex items-start">
                 <span className="flex items-center justify-center w-6 h-6 rounded-full bg-blue-100 text-blue-600 text-sm font-semibold mr-2 flex-shrink-0">3</span>
-                <span>Your clean laundry will be delivered within 24-48 hours.</span>
+                <span>Your clean laundry will be delivered within 24–48 hours.</span>
               </li>
             </ol>
           </div>
         </div>
-        
+
         <div className="flex flex-col sm:flex-row gap-4 mt-8">
           <Link
             to="/"
